@@ -17,6 +17,11 @@ object Fuel {
   case object Diesel extends Type
 }
 
-case class BrandNewCar(val id: String, val title: String, val fuel: Fuel.Type, val price: Int)
+case class BrandNewCar(val id: String, val title: String, val fuel: Fuel.Type, val price: Int) {
+  require(id != null && !id.isEmpty)
+  require(title != null && !title.isEmpty)
+  require(fuel != null)
+  require(price >= 0)
+}
 
 
