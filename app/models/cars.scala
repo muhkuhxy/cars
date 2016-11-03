@@ -12,16 +12,44 @@ import java.time.LocalDate
 //* **first registration** (_only for used cars_): **date** without time.
 
 object Fuel {
+
   sealed trait Type
+
   case object Gasoline extends Type
+
   case object Diesel extends Type
+
 }
 
-case class BrandNewCar(val id: String, val title: String, val fuel: Fuel.Type, val price: Int) {
+sealed trait Car {
+
   require(id != null && !id.isEmpty)
   require(title != null && !title.isEmpty)
   require(fuel != null)
   require(price >= 0)
+
+  def id: String
+
+  def title: String
+
+  def fuel: Fuel.Type
+
+  def price: Int
 }
 
+case class BrandNewCar(val id: String,
+                       val title: String,
+                       val fuel: Fuel.Type,
+                       val price: Int) extends Car {
 
+}
+
+case class UsedCar(val id: String,
+                   val title: String,
+                   val fuel: Fuel.Type,
+                   val price: Int,
+                   val mileage: Int,
+                   val firstRegistration: LocalDate) extends Car {
+  require(mileage >= 0)
+  require(firstRegistration != null)
+}
