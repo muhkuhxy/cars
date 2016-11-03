@@ -1,12 +1,15 @@
-import org.scalatestplus.play.PlaySpec
-import models.Car
+import org.scalatestplus.play._
+import models._
 
 class CarTest extends PlaySpec {
 
-  "A new car" must {
-    "pass this dummy test" in {
-      val json = ""
-      new Car(json).json mustEqual json
+  "A brand new car" must {
+    "be constructable with all required fields" in {
+      val car = new BrandNewCar("1", "super nice car", Fuel.Gasoline, 5000)
+      car.fuel mustBe Fuel.Gasoline
+      car.id mustBe "1"
+      car.title mustBe "super nice car"
+      car.price mustBe 5000
     }
   }
 
