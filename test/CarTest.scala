@@ -2,7 +2,7 @@ import org.scalatestplus.play._
 import models._
 import java.time._
 
-class BrandNewCarTest extends PlaySpec {
+class CarConstructionTest extends PlaySpec {
   val are = afterWord("are")
 
   "A brand new car" when {
@@ -39,11 +39,6 @@ class BrandNewCarTest extends PlaySpec {
     }
 
   }
-
-}
-
-class UsedCarTest extends PlaySpec {
-  val are = afterWord("are")
 
   "A used car" when {
 
@@ -85,4 +80,5 @@ class UsedCarTest extends PlaySpec {
     }
 
   }
+
 }
