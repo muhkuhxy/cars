@@ -3,6 +3,6 @@ package models
 import controllers.CarForm
 
 trait CarRepository {
-  def add(form: CarForm): Int
-  def find(id: Int): Option[Car]
+  def add(form: CarForm): Option[Long]
+  def find(id: Long): Option[Car]
 }

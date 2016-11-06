@@ -1,1 +1,2 @@
 POST   /car               @controllers.CarController.create
+GET    /car/:id           @controllers.CarController.get(id: Long)

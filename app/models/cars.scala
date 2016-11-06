@@ -13,22 +13,22 @@ import java.time.LocalDate
 
 object Fuel {
 
-  sealed trait Type {
-    override def toString = this match {
-      case Gasoline => "Gasoline"
-      case Diesel => "Diesel"
-    }
+  val names: Map[Type, String] = Map(
+    Gasoline -> "Gasoline",
+    Diesel -> "Diesel"
+  )
 
-    def apply(value: String) = value match {
-      case "Gasoline" => Fuel.Gasoline
-      case "Diesel" => Fuel.Diesel
-    }
+  val values = names map { case (k, v) => v -> k }
+
+  sealed trait Type {
+    override def toString: String = names(this)
   }
 
   case object Gasoline extends Type
 
   case object Diesel extends Type
 
+  def apply(value: String) = values(value)
 }
 
 sealed trait Car {
@@ -37,13 +37,13 @@ sealed trait Car {
   require(fuel != null)
   require(price >= 0)
 
-  def id: Int
+  val id: Int
 
-  def title: String
+  val title: String
 
-  def fuel: Fuel.Type
+  val fuel: Fuel.Type
 
-  def price: Int
+  val price: Int
 }
 
 case class BrandNewCar(val id: Int,
