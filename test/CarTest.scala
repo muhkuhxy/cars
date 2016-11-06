@@ -8,7 +8,7 @@ class CarConstructionTest extends PlaySpec {
   "A brand new car" when {
 
     "created" must {
-      val validInput = ("1", "super nice car", Fuel.Gasoline, 5000)
+      val validInput = (1, "super nice car", Fuel.Gasoline, 5000)
       val buildCar = BrandNewCar.tupled
 
       "succeed on valid values" in {
@@ -22,8 +22,6 @@ class CarConstructionTest extends PlaySpec {
 
       "fail on invalid values" which are {
         Seq(
-          ("id is null", validInput.copy(_1 = null)),
-          ("id is empty", validInput.copy(_1 = "")),
           ("title is null", validInput.copy(_2 = null)),
           ("title is empty", validInput.copy(_2 = "")),
           ("fuel is null", validInput.copy(_3 = null)),
@@ -44,7 +42,7 @@ class CarConstructionTest extends PlaySpec {
 
     "created" must {
       val registration = LocalDate.of(2011, Month.DECEMBER, 13)
-      val validInput = ("1", "super nice car", Fuel.Gasoline, 5000, 12026, registration)
+      val validInput = (1, "super nice car", Fuel.Gasoline, 5000, 12026, registration)
       val buildCar = UsedCar.tupled
 
       "succeed on valid values" in {
@@ -61,8 +59,6 @@ class CarConstructionTest extends PlaySpec {
 
       "fail on invalid values" which are {
         Seq(
-          ("id is null", validInput.copy(_1 = null)),
-          ("id is empty", validInput.copy(_1 = "")),
           ("title is null", validInput.copy(_2 = null)),
           ("title is empty", validInput.copy(_2 = "")),
           ("fuel is null", validInput.copy(_3 = null)),
