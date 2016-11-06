@@ -14,7 +14,8 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
 
   "The car advert api" must {
 
-    val advertJson: JsValue = Json.parse(
+    "support all required operations" in {
+      val advertJson: JsValue = Json.parse(
       """
          { "title": "test advert",
            "fuel": "Gasoline",
@@ -22,28 +23,41 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
            "new": true
          }
       """)
-
-    "support all required operations" in {
-      val advertUrl = createAdvert()
-      assertAdvertRetrievable(advertUrl)
+      val advertUrl = createAdvert(advertJson)
+      assertAdvertRetrievable(advertUrl, advertJson, id = 1)
       // TODO: PUT
       // TODO: DELETE
     }
 
-    def createAdvert() = {
+    "support adding used car adverts" in {
+      val advertJson: JsValue = Json.parse(
+        """
+         { "title": "test advert",
+           "fuel": "Gasoline",
+           "price": 123456,
+           "new": false,
+           "mileage": 75034,
+           "firstRegistration": "1999-07-07"
+         }
+        """)
+      val advertUrl = createAdvert(advertJson)
+      assertAdvertRetrievable(advertUrl, advertJson, id = 2)
+    }
+
+    def createAdvert(request: JsValue) = {
       val response = await(
         wsCall(
           controllers.routes.CarController.create()
-        ).post(advertJson))
+        ).post(request))
       response.status mustBe 201
       val location = response.header("location")
       location.value must endWith regex """/car/\d+"""
       location.value
     }
 
-    def assertAdvertRetrievable(url: String) {
+    def assertAdvertRetrievable(url: String, advertJson: JsValue, id: Int = 1) {
       val JsSuccess(carWithId, _) = advertJson.transform(
-        __.read[JsObject].map(o => o ++ Json.obj("id" -> 1))
+        __.read[JsObject].map(o => o ++ Json.obj("id" -> id))
           andThen ((__ \ 'new).json.prune)
       )
 

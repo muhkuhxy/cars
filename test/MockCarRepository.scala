@@ -9,6 +9,8 @@ class MockCarRepository @Inject() (val cars: Seq[Car] = Seq()) extends CarReposi
     Some(maxId)
   }
 
+  override def addUsed(form: CarForm): Option[Long] = addNew(form)
+
   override def find(id: Long): Option[Car] = {
     cars.find(id == _.id)
   }

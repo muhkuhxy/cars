@@ -7,16 +7,17 @@ class CarService @Inject() (repo: CarRepository) {
 
   def add(form: CarForm): Option[Long] = {
     if(form.`new`) {
-      require(form.registrationDate.isEmpty)
+      require(form.firstRegistration.isEmpty)
       require(form.mileage.isEmpty)
       repo.addNew(form)
     }
     else {
-      require(form.registrationDate.nonEmpty)
+      require(form.firstRegistration.nonEmpty)
       require(form.mileage.nonEmpty)
-//      repo.addUsed(form)
-      ???
+      repo.addUsed(form)
     }
   }
+
+  def find(id: Long) = repo.find(id)
 
 }

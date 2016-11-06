@@ -45,4 +45,4 @@ case class CarForm(title: String,
                    price: Int,
                    `new`: Boolean,
                    mileage: Option[Int],
-                   registrationDate: Option[LocalDate])
+                   firstRegistration: Option[LocalDate])

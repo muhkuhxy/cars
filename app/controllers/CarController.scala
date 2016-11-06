@@ -6,7 +6,7 @@ import models._
 import play.api.libs.json._
 import play.api.mvc._
 
-class CarController @Inject() (private val repository: CarRepository) extends Controller with JsonConversions {
+class CarController @Inject() (private val service: CarService) extends Controller with JsonConversions {
 
   def create = Action(BodyParsers.parse.json) { request =>
     request.body.validate[CarForm].fold(
@@ -14,7 +14,7 @@ class CarController @Inject() (private val repository: CarRepository) extends Co
         BadRequest(Json.obj("message" -> JsError.toJson(errors)))
       },
       form => {
-        repository.addNew(form) match {
+        service.add(form) match {
           case Some(id) => Created("Created").withHeaders(("location", s"/car/$id"))
           case None => InternalServerError
         }
@@ -23,7 +23,7 @@ class CarController @Inject() (private val repository: CarRepository) extends Co
   }
 
   def get(id: Long) = Action {
-    repository.find(id) match {
+    service.find(id) match {
       case Some(car) => Ok(Json.toJson(car))
       case None => NotFound
     }

@@ -6,7 +6,9 @@ create table cars (
     title varchar(255) not null,
     fuel varchar(255) not null,
     price int not null,
-    new bool not null
+    new bool not null,
+    mileage int,
+    firstRegistration date
 );
 
 
