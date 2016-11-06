@@ -1,9 +1,14 @@
 import Specs._
+import models.CarRepository
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
-import play.api.Logger
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 
 class IntegrationTest extends PlaySpec with OneServerPerSuite {
+
+  override lazy val app = new GuiceApplicationBuilder().overrides(bind[CarRepository].to[MockCarRepository])
+    .build()
 
   "The car advert api" must {
     "create a new advert" in {

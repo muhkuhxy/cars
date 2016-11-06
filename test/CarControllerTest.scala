@@ -9,7 +9,8 @@ class CarControllerTest extends PlaySpec with Results {
   "A CarController" when {
     "POSTing to /car" must {
       "create a new car advert" in {
-        val controller = new CarController
+        val carRepository = new MockCarRepository
+        val controller = new CarController(carRepository)
         val result: Result = await(controller.create().apply(FakeRequest().withBody(
           Json.parse(
             """{
