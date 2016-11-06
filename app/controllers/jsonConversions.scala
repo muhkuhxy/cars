@@ -8,10 +8,16 @@ import play.api.libs.json._
 trait JsonConversions {
 
   implicit val fuelReads: Reads[Fuel.Type] = new Reads[Fuel.Type] {
+    def error(input: Any) = JsError(
+      s"""invalid fuel type "${input}".
+         |valid values are ${Fuel.names.values.mkString(", ")}""".stripMargin)
+
     override def reads(json: JsValue): JsResult[Fuel.Type] = json match {
-      case JsString("Gasoline") => JsSuccess(Fuel.Gasoline)
-      case JsString("Diesel") => JsSuccess(Fuel.Diesel)
-      case _ => JsError(s"invalid fuel type. valid values are Diesel and Gasoline")
+      case JsString(s) => Fuel.values.get(s) match {
+        case Some(fuel) => JsSuccess(fuel)
+        case None => error(s)
+      }
+      case _ => error(json)
     }
   }
 

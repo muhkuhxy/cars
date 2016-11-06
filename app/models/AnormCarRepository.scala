@@ -8,7 +8,7 @@ import play.api.Play.current
 
 class AnormCarRepository extends CarRepository with DateConversions {
 
-  override def add(form: CarForm): Option[Long] = DB.withConnection { implicit c =>
+  override def addNew(form: CarForm): Option[Long] = DB.withConnection { implicit c =>
     SQL"insert into cars (title, fuel, price, new) values (${form.title}, ${form.fuel.toString}, ${form.price}, ${form.`new`});"
       .executeInsert()
   }

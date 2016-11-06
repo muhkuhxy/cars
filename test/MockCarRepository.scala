@@ -4,7 +4,7 @@ import models.{Car, CarRepository}
 
 class MockCarRepository @Inject() (val cars: Seq[Car] = Seq()) extends CarRepository {
   private var maxId: Int = 0
-  override def add(form: CarForm): Option[Long] = {
+  override def addNew(form: CarForm): Option[Long] = {
     maxId += 1
     Some(maxId)
   }

@@ -14,15 +14,13 @@ import java.time.LocalDate
 object Fuel {
 
   val names: Map[Type, String] = Map(
-    Gasoline -> "Gasoline",
-    Diesel -> "Diesel"
+    Gasoline -> Gasoline.toString,
+    Diesel -> Diesel.toString
   )
 
   val values = names map { case (k, v) => v -> k }
 
-  sealed trait Type {
-    override def toString: String = names(this)
-  }
+  sealed trait Type
 
   case object Gasoline extends Type
 

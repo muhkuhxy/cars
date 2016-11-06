@@ -26,6 +26,8 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
     "support all required operations" in {
       val advertUrl = createAdvert()
       assertAdvertRetrievable(advertUrl)
+      // TODO: PUT
+      // TODO: DELETE
     }
 
     def createAdvert() = {

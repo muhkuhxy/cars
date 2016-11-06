@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import models._
-import play.api.libs.json.{JsString, JsValue, Json, Writes}
+import play.api.libs.json._
 import play.api.mvc._
 
 class CarController @Inject() (private val repository: CarRepository) extends Controller with JsonConversions {
@@ -11,10 +11,10 @@ class CarController @Inject() (private val repository: CarRepository) extends Co
   def create = Action(BodyParsers.parse.json) { request =>
     request.body.validate[CarForm].fold(
       errors => {
-        BadRequest("Invalid request")
+        BadRequest(Json.obj("message" -> JsError.toJson(errors)))
       },
       form => {
-        repository.add(form) match {
+        repository.addNew(form) match {
           case Some(id) => Created("Created").withHeaders(("location", s"/car/$id"))
           case None => InternalServerError
         }
@@ -28,6 +28,8 @@ class CarController @Inject() (private val repository: CarRepository) extends Co
       case None => NotFound
     }
   }
+
+  // TODO: PUT refuses to change id
 
 }
 
