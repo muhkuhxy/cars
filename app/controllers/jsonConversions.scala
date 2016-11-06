@@ -27,14 +27,34 @@ trait JsonConversions {
     override def writes(fuel: Fuel.Type): JsValue = JsString(fuel.toString)
   }
 
-  val newCarWrite = Json.writes[BrandNewCar]
+  val newCarFormat = Json.format[BrandNewCar]
 
-  val usedCarWrite = Json.writes[UsedCar]
+  val usedCarFormat = Json.format[UsedCar]
 
-  implicit val carWrites: Writes[Car] = new Writes[Car] {
-    override def writes(car: Car): JsValue = car match {
-      case bnc: BrandNewCar => Json.toJson(bnc)(newCarWrite)
-      case uc: UsedCar => Json.toJson(uc)(usedCarWrite)
+  implicit val carFormat: Format[Car] = new Format[Car] {
+    override def reads(json: JsValue): JsResult[Car] = {
+      json.transform((__ \ 'new).json.pick[JsBoolean]) match {
+        case JsSuccess(JsBoolean(true), _) => newCarFormat.reads(json)
+        case JsSuccess(JsBoolean(false), _) => usedCarFormat.reads(json)
+        case _ => JsError("missing \"new\" information")
+      }
+    }
+
+    override def writes(car: Car): JsValue = {
+      val common = Json.obj(
+        "id" -> car.id,
+        "title" -> car.title,
+        "fuel" -> car.fuel,
+        "price" -> car.price
+      )
+      car match {
+        case bnc: BrandNewCar => common ++ Json.obj("new" -> true)
+        case uc: UsedCar =>
+          common ++ Json.obj("new" -> false,
+            "mileage" -> uc.mileage,
+            "firstRegistration" -> uc.firstRegistration
+          )
+      }
     }
   }
 

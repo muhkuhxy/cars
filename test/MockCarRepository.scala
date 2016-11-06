@@ -15,4 +15,5 @@ class MockCarRepository @Inject() (val cars: Seq[Car] = Seq()) extends CarReposi
     cars.find(id == _.id)
   }
 
+  override def replace(car: Car): Boolean = true
 }

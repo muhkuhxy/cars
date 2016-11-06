@@ -1,5 +1,6 @@
 import models.{AnormCarRepository, CarRepository}
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import play.api.Logger
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
@@ -15,22 +16,39 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
   "The car advert api" must {
 
     "support all required operations" in {
-      val advertJson: JsValue = Json.parse(
+      val id = 1
+      val advertJson: JsObject = Json.parse(
       """
          { "title": "test advert",
            "fuel": "Gasoline",
            "price": 123456,
            "new": true
          }
-      """)
+      """).as[JsObject]
       val advertUrl = createAdvert(advertJson)
-      assertAdvertRetrievable(advertUrl, advertJson, id = 1)
-      // TODO: PUT
+      assertAdvertRetrievable(advertUrl, advertJson, id)
+
+      val updatedAdvert = Json.parse(
+        s"""
+          |{ "id": $id,
+          |"title": "i used the car :(",
+          |"fuel": "Diesel",
+          |"price": 12345,
+          |"new": false,
+          |"mileage": 17,
+          |"firstRegistration": "2016-07-01"
+          |}
+        """.stripMargin
+      ).as[JsObject]
+      updateAdvert(updatedAdvert, id)
+
+      assertAdvertRetrievable(advertUrl, updatedAdvert, id)
+
       // TODO: DELETE
     }
 
     "support adding used car adverts" in {
-      val advertJson: JsValue = Json.parse(
+      val advertJson: JsObject = Json.parse(
         """
          { "title": "test advert",
            "fuel": "Gasoline",
@@ -39,7 +57,7 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
            "mileage": 75034,
            "firstRegistration": "1999-07-07"
          }
-        """)
+        """).as[JsObject]
       val advertUrl = createAdvert(advertJson)
       assertAdvertRetrievable(advertUrl, advertJson, id = 2)
     }
@@ -55,14 +73,18 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
       location.value
     }
 
-    def assertAdvertRetrievable(url: String, advertJson: JsValue, id: Int = 1) {
-      val JsSuccess(carWithId, _) = advertJson.transform(
-        __.read[JsObject].map(o => o ++ Json.obj("id" -> id))
-          andThen ((__ \ 'new).json.prune)
-      )
-
+    def assertAdvertRetrievable(url: String, advertJson: JsObject, id: Int = 1) {
+      val carWithId = advertJson ++ Json.obj("id" -> id)
       val car = await(wsUrl(url).get).body
       Json.parse(car) mustEqual carWithId
+    }
+
+    def updateAdvert(request: JsValue, id: Long): Unit = {
+      val response = await(
+        wsCall(
+          controllers.routes.CarController.update(id)
+        ).put(request))
+      response.status mustBe 200
     }
   }
 

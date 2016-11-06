@@ -1,7 +1,7 @@
 package controllers
 
 import com.google.inject.Inject
-import models.CarRepository
+import models.{Car, CarRepository}
 
 class CarService @Inject() (repo: CarRepository) {
 
@@ -19,5 +19,10 @@ class CarService @Inject() (repo: CarRepository) {
   }
 
   def find(id: Long) = repo.find(id)
+
+  def replace(id: Long, car: Car): Boolean = {
+    require(id == car.id)
+    repo.replace(car)
+  }
 
 }

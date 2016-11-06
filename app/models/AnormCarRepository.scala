@@ -5,6 +5,7 @@ import java.util.Date
 import anorm.SqlParser._
 import anorm._
 import controllers.CarForm
+import play.api.Logger
 import play.api.db.DB
 import play.api.Play.current
 
@@ -43,4 +44,23 @@ class AnormCarRepository extends CarRepository with DateConversions {
     }
   }
 
+  override def replace(car: Car): Boolean = DB.withConnection { implicit c =>
+    val query = car match {
+      case BrandNewCar(id, title, fuel, price) =>
+        SQL"""update cars set title = $title, fuel = ${fuel.toString}, price = $price,
+              mileage = ${Option.empty[Int]}, firstRegistration = ${Option.empty[Date]},
+              new = ${true}
+              where id = $id"""
+      case UsedCar(id, title, fuel, price, mileage, firstRegistration) =>
+        SQL"""update cars set title = $title, fuel = ${fuel.toString}, price = $price,
+              mileage = ${mileage}, firstRegistration = ${toDate(firstRegistration)},
+              new = ${false}
+              where id = $id"""
+    }
+    val rowsAffected = query.executeUpdate()
+    if(rowsAffected != 1) {
+      Logger.error(s"expected to update 1 row, but actually updated $rowsAffected on car $car")
+    }
+    rowsAffected == 1
+  }
 }

@@ -34,7 +34,18 @@ class CarController @Inject()(private val service: CarService) extends Controlle
     }
   }
 
-  // TODO: PUT refuses to change id
+  def update(id: Long) = Action(BodyParsers.parse.json) { request =>
+    request.body.validate[Car].fold(
+      errors => BadRequest(Json.obj("message" -> JsError.toJson(errors))),
+      car => {
+        if (service.replace(id, car)) {
+          Ok(Json.obj("message" -> "advert replaced"))
+        }
+        else {
+          InternalServerError
+        }
+      })
+  }
 
 }
 

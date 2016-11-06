@@ -9,9 +9,9 @@ import play.api.test.Helpers._
 
 class CarControllerTest extends PlaySpec with Results {
   "A CarController" when {
+    val controller = new CarController(new CarService(new MockCarRepository()))
     "POSTing /car" must {
       "create a new car advert" in {
-        val controller = new CarController(new CarService(new MockCarRepository()))
         val result: Result = await(controller.create().apply(FakeRequest().withBody(
           Json.parse(
             """{
@@ -27,7 +27,6 @@ class CarControllerTest extends PlaySpec with Results {
       }
 
       "refuse invalid fuel types" in {
-        val controller = new CarController(new CarService(new MockCarRepository()))
         val result: Result = await(controller.create().apply(FakeRequest().withBody(
           Json.parse(
             """{
@@ -54,9 +53,28 @@ class CarControllerTest extends PlaySpec with Results {
             "id": 1,
             "title": "car",
             "fuel": "Gasoline",
-            "price": 123
+            "price": 123,
+            "new": true
           }
         """)
+      }
+    }
+
+    "PUTting an existing advert" must {
+      "refuse inconsistent requests" in {
+        val result: Result = await(controller.create().apply(FakeRequest().withBody(
+          Json.parse(
+            """{
+              |"id": 1,
+              |"title": "some car",
+              |"fuel": "Gasoline",
+              |"price": 12345,
+              |"new": false,
+              |"mileage": 10
+              |}
+            """.stripMargin))))
+
+        result.header.status mustBe 400
       }
     }
   }
