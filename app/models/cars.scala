@@ -40,9 +40,8 @@ sealed trait Car {
 case class BrandNewCar(val id: String,
                        val title: String,
                        val fuel: Fuel.Type,
-                       val price: Int) extends Car {
+                       val price: Int) extends Car
 
-}
 
 case class UsedCar(val id: String,
                    val title: String,
