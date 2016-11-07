@@ -16,7 +16,9 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
   "The car advert api" must {
 
     "support all required operations" in {
-      val id = 4
+      val list = assertListIsSortable
+
+      val id = (list \\ "id").map(_.as[Int]).max + 1
       val advertJson: JsObject = Json.parse(
       """
          { "title": "test advert",
@@ -61,6 +63,13 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
         """).as[JsObject]
       val advertUrl = createAdvert(advertJson)
       assertAdvertRetrievable(advertUrl, advertJson, id = 5)
+    }
+
+    def assertListIsSortable = {
+      val response = await(wsCall(controllers.routes.CarController.list("price", ascending = false)).get)
+      val json: JsValue = Json.parse(response.body)
+      (json \\ "price").map(_.as[Int]) mustBe Seq(30000, 2500, 1000)
+      json
     }
 
     def createAdvert(request: JsValue) = {
