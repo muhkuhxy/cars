@@ -1,4 +1,4 @@
-GET    /car               @controllers.CarController.list
+GET    /car               @controllers.CarController.list(sort: String ?= "id", ascending: Boolean ?= true)
 POST   /car               @controllers.CarController.create
 PUT    /car/:id           @controllers.CarController.update(id: Long)
 GET    /car/:id           @controllers.CarController.get(id: Long)

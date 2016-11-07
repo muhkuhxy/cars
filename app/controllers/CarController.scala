@@ -1,5 +1,6 @@
 package controllers
 
+import java.time.LocalDate
 import java.util.NoSuchElementException
 import javax.inject.Inject
 
@@ -13,9 +14,16 @@ import scala.util.{Failure, Success, Try}
 
 class CarController @Inject()(private val service: CarService) extends Controller with JsonConversions {
 
-  def list = Action { request =>
-    val cars: Seq[CarAdvert] = service.findAll
-    Ok(Json.toJson(cars))
+  val sortable = Set("id", "title", "fuel", "price", "new", "mileage", "firstRegistration")
+
+  def list(sort: String, ascending: Boolean) = Action { request =>
+    if (!sortable.contains(sort)) {
+      BadRequest(s"cannot sort by $sort")
+    }
+    else {
+      val cars: Seq[CarAdvert] = service.findAll(sort, ascending)
+      Ok(Json.toJson(cars))
+    }
   }
 
   def create = Action(BodyParsers.parse.json) { request =>

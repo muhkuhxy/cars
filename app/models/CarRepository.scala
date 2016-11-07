@@ -7,7 +7,7 @@ trait CarRepository {
 
   def find(id: Long): Option[CarAdvert]
 
-  def findAll: Seq[CarAdvert]
+  def findAll(sort: String, ascending: Boolean): Seq[CarAdvert]
 
   def replace(car: CarAdvert): Int
 

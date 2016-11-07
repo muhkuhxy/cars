@@ -50,8 +50,9 @@ class AnormCarRepository extends CarRepository with DateConversions {
       SQL"delete from cars where id = $id".executeUpdate()
   }
 
-  override def findAll: Seq[CarAdvert] = DB.withConnection { implicit c =>
-      SQL"select new, id, title, fuel, price, new, mileage, firstRegistration from cars"
+  override def findAll(sort: String, ascending: Boolean): Seq[CarAdvert] = DB.withConnection { implicit c =>
+    val sortOrder = if (ascending) "asc" else "desc"
+      SQL(s"""select id, title, fuel, price, new, mileage, firstRegistration from cars order by $sort $sortOrder""")
         .as(carParser.*)
   }
 }

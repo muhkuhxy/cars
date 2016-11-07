@@ -24,5 +24,5 @@ class MockCarRepository @Inject() (var cars: Seq[CarAdvert] = Seq()) extends Car
 
   override def replace(car: CarAdvert): Int = 1
 
-  override def findAll: Seq[CarAdvert] = ???
+  override def findAll(sort: String, ascending: Boolean): Seq[CarAdvert] = ???
 }

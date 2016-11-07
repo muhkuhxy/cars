@@ -16,7 +16,7 @@ class CarService @Inject()(repo: CarRepository) {
 
   def find(id: Long) = repo.find(id)
 
-  def findAll = repo.findAll
+  def findAll(sort: String, ascending: Boolean) = repo.findAll(sort, ascending)
 
   def replace(id: Long, car: CarAdvert): Unit = {
     require(id == car.id, "id cannot be changed, remove and create new advert")
