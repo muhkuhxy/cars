@@ -30,4 +30,17 @@ class CarService @Inject()(repo: CarRepository) {
     }
   }
 
+  def remove(id: Long): Unit = {
+    if (!repo.exists(id)) {
+      throw new NoSuchElementException
+    }
+    else {
+      val rowsAffected = repo.remove(id)
+      if(rowsAffected != 1) {
+        throw new IllegalStateException(
+          s"expected to remove 1 row, but actually removed $rowsAffected on id $id")
+      }
+    }
+  }
+
 }

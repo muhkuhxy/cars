@@ -77,5 +77,24 @@ class CarControllerTest extends PlaySpec with Results {
         result.header.status mustBe 400
       }
     }
+
+
+    "DELETEing an advert" must {
+      "inform user of nonexisting adverts" in {
+        val result: Result = await(controller.remove(1).apply(FakeRequest()))
+
+        result.header.status mustBe 404
+      }
+
+      "remove an existing advert" in {
+        val car: BrandNewCar = BrandNewCar(1, "car", Fuel.Gasoline, 123)
+        val repo = new MockCarRepository(Seq(car))
+        val controller = new CarController(new CarService(repo))
+        val result: Result = await(controller.remove(1).apply(FakeRequest()))
+
+        result.header.status mustBe 200
+        repo.cars.size mustBe 0
+      }
+    }
   }
 }

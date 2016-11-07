@@ -44,7 +44,8 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
 
       assertAdvertRetrievable(advertUrl, updatedAdvert, id)
 
-      // TODO: DELETE
+      deleteAdvert(advertUrl)
+      assertUnavailable(advertUrl)
     }
 
     "support adding used car adverts" in {
@@ -74,7 +75,7 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
     }
 
     def assertAdvertRetrievable(url: String, advertJson: JsObject, id: Int = 1) {
-      val carWithId = advertJson ++ Json.obj("id" -> id)
+      val carWithId = advertJson + ("id" -> JsNumber(id))
       val car = await(wsUrl(url).get).body
       Json.parse(car) mustEqual carWithId
     }
@@ -85,6 +86,16 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
           controllers.routes.CarController.update(id)
         ).put(request))
       response.status mustBe 200
+    }
+
+    def deleteAdvert(url: String) = {
+      val response = await(wsUrl(url).delete)
+      response.status mustBe 200
+    }
+
+    def assertUnavailable(url: String) = {
+      val response = await(wsUrl(url).get)
+      response.status mustBe 404
     }
   }
 

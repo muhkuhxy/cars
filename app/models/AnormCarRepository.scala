@@ -64,4 +64,7 @@ class AnormCarRepository extends CarRepository with DateConversions {
     SQL"select id from cars where id = $id".as(int("id").singleOpt).nonEmpty
   }
 
+  override def remove(id: Long): Int = DB.withConnection { implicit c =>
+    SQL"delete from cars where id = $id".executeUpdate()
+  }
 }

@@ -49,6 +49,14 @@ class CarController @Inject()(private val service: CarService) extends Controlle
       })
   }
 
+  def remove(id: Long) = Action { request =>
+    Try(service.remove(id)) match {
+      case Success(()) => Ok(message("advert removed"))
+      case Failure(e: NoSuchElementException) => NotFound(message(s"unknown advert $id"))
+      case Failure(_: Exception) => InternalServerError
+    }
+  }
+
   private def message(msg: String) = Json.obj("message" -> msg)
 
   private def message(errors: Seq[(JsPath, Seq[ValidationError])]) =

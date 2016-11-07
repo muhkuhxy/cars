@@ -13,4 +13,5 @@ trait CarRepository {
 
   def exists(id: Long): Boolean
 
+  def remove(id: Long): Int
 }

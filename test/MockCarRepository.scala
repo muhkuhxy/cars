@@ -17,5 +17,11 @@ class MockCarRepository @Inject() (var cars: Seq[Car] = Seq()) extends CarReposi
 
   override def exists(id: Long): Boolean = cars.find(id == _.id).nonEmpty
 
+  override def remove(id: Long): Int = {
+    val (removed, newCars) = cars.partition(id == _.id)
+    cars = newCars
+    removed.size
+  }
+
   override def replace(car: Car): Int = 1
 }
