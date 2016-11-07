@@ -2,6 +2,8 @@ import org.scalatestplus.play._
 import models._
 import java.time._
 
+import controllers.CarForm
+
 class CarConstructionTest extends PlaySpec {
   val are = afterWord("are")
 
@@ -75,6 +77,61 @@ class CarConstructionTest extends PlaySpec {
       }
     }
 
+  }
+
+  "A form for a car" must {
+    "accept valid values" in {
+      val validNewCar = CarForm("new car", Fuel.Diesel, 10000, true, None, None)
+      val validUsedCar = CarForm("used car", Fuel.Gasoline, 5000, false, Some(123000), Some(LocalDate.now()))
+    }
+
+    "refuse empty title" in {
+      a[IllegalArgumentException] must be thrownBy {
+        CarForm("", Fuel.Diesel, 10000, true, None, None)
+      }
+    }
+
+    "refuse null fuel" in {
+      a[IllegalArgumentException] must be thrownBy {
+        CarForm("title", null, 10000, true, None, None)
+      }
+    }
+
+    "refuse negative price" in {
+      a[IllegalArgumentException] must be thrownBy {
+        CarForm("new car", Fuel.Diesel, -1, true, None, None)
+      }
+    }
+
+    "refuse null mileage" in {
+      a[IllegalArgumentException] must be thrownBy {
+        CarForm("new car", Fuel.Diesel, 10000, true, null, None)
+      }
+    }
+
+    "refuse null registration date" in {
+      a[IllegalArgumentException] must be thrownBy {
+        CarForm("new car", Fuel.Diesel, 10000, true, None, null)
+      }
+    }
+
+    "refuse used car without registration date" in {
+      a[IllegalArgumentException] must be thrownBy {
+        CarForm("used car", Fuel.Diesel, 10000, false, Some(123000), None)
+      }
+    }
+
+    "refuse used car without mileage" in {
+      a[IllegalArgumentException] must be thrownBy {
+        CarForm("used car", Fuel.Diesel, 10000, false, None, Some(LocalDate.now))
+      }
+    }
+
+    "refuse used car with negative mileage" in {
+      a[IllegalArgumentException] must be thrownBy {
+        CarForm("used car", Fuel.Diesel, 10000, false, Some(-1), Some(LocalDate.now))
+      }
+    }
   }
 
 }

@@ -66,6 +66,12 @@ case class CarForm(title: String,
                    `new`: Boolean,
                    mileage: Option[Int],
                    firstRegistration: Option[LocalDate]) {
+  require(title != null && !title.isEmpty)
+  require(fuel != null)
+  require(price >= 0)
+
+  require(mileage != null)
+  require(firstRegistration != null)
   if(`new`) {
     require(firstRegistration.isEmpty, "new cars must not have firstRegistration set")
     require(mileage.isEmpty, "new cars must not have mileage set")
@@ -73,10 +79,6 @@ case class CarForm(title: String,
   else {
     require(firstRegistration.nonEmpty, "used cars must have firstRegistration set")
     require(mileage.nonEmpty, "used cars must have mileage set")
+    require(mileage.get >= 0, "mileage must be >= 0")
   }
-  require(title != null && !title.isEmpty)
-  require(fuel != null)
-  require(price >= 0)
-  require(mileage != null)
-  require(firstRegistration != null)
 }
