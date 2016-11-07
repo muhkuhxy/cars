@@ -16,7 +16,7 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
   "The car advert api" must {
 
     "support all required operations" in {
-      val id = 1
+      val id = 4
       val advertJson: JsObject = Json.parse(
       """
          { "title": "test advert",
@@ -60,7 +60,7 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
          }
         """).as[JsObject]
       val advertUrl = createAdvert(advertJson)
-      assertAdvertRetrievable(advertUrl, advertJson, id = 2)
+      assertAdvertRetrievable(advertUrl, advertJson, id = 5)
     }
 
     def createAdvert(request: JsValue) = {
