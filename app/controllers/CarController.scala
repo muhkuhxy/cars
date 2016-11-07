@@ -4,6 +4,7 @@ import java.util.NoSuchElementException
 import javax.inject.Inject
 
 import models._
+import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.mvc._
@@ -13,7 +14,7 @@ import scala.util.{Failure, Success, Try}
 class CarController @Inject()(private val service: CarService) extends Controller with JsonConversions {
 
   def list = Action { request =>
-    val cars: Seq[Car] = service.findAll
+    val cars: Seq[CarAdvert] = service.findAll
     Ok(Json.toJson(cars))
   }
 
@@ -42,14 +43,17 @@ class CarController @Inject()(private val service: CarService) extends Controlle
   }
 
   def update(id: Long) = Action(BodyParsers.parse.json) { request =>
-    request.body.validate[Car].fold(
+    request.body.validate[CarAdvert].fold(
       errors => BadRequest(message(errors)),
       car => {
         Try(service.replace(id, car)) match {
           case Success(()) => Ok(message("advert replaced"))
           case Failure(e: IllegalArgumentException) => BadRequest(message(e.getMessage))
           case Failure(e: NoSuchElementException) => NotFound(message(s"unknown advert $id"))
-          case Failure(_: Exception) => InternalServerError
+          case Failure(e: Exception) => {
+            Logger.error(e.getMessage)
+            InternalServerError
+          }
         }
       })
   }

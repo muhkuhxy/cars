@@ -1,13 +1,12 @@
 package models
 
+import java.time.LocalDate
 import java.util.Date
 
 import anorm.SqlParser._
 import anorm.{~, _}
-import controllers.AdvertForm
-import play.api.Logger
-import play.api.db.DB
 import play.api.Play.current
+import play.api.db.DB
 
 class AnormCarRepository extends CarRepository with DateConversions {
 
@@ -23,63 +22,36 @@ class AnormCarRepository extends CarRepository with DateConversions {
        """.executeInsert()
   }
 
-  private val newCarParser = int("id") ~ str("title") ~ (str("fuel") map Fuel.apply _) ~ int("price")
-  private val usedCarParser = newCarParser ~ get[Option[Int]]("mileage") ~ (get[Option[Date]]("firstRegistration"))
-
-  override def find(id: Long): Option[Car] = DB.withConnection { implicit c =>
-    SQL"select new from cars where id = $id".as(bool("new").singleOpt) map { isNew: Boolean =>
-      if(isNew) {
-        val tuple = SQL"select id, title, fuel, price from cars where id = $id"
-          .as(newCarParser.map(flatten).single)
-        BrandNewCar.tupled(tuple)
-      }
-      else {
-        val parser = usedCarParser map flatten map {
-          case (id, title, fuel, price, Some(mileage), Some(firstRegistration)) =>
-            UsedCar(id, title, fuel, price, mileage, toLocalDate(firstRegistration))
-          case broken => throw new RuntimeException(s"stored advert with id $id is inconsistent $broken")
-        }
-        SQL"select id, title, fuel, price, mileage, firstRegistration from cars where id = $id"
-          .as(parser.single)
-      }
-    }
+  private val carParser = (int("id") ~ str("title") ~ (str("fuel") map Fuel.apply _) ~ int("price") ~
+    bool("new") ~ get[Option[Int]]("mileage") ~ (get[Option[Date]]("firstRegistration"))) map {
+    case id ~ title ~ fuel ~ price ~ isNew ~ mileage ~ date =>
+      CarAdvert(id, title, fuel, price, isNew, mileage, date map toLocalDate _)
   }
 
-  override def replace(car: Car): Int = DB.withConnection { implicit c =>
-    val query = car match {
-      case BrandNewCar(id, title, fuel, price) =>
-        SQL"""update cars set title = $title, fuel = ${fuel.toString}, price = $price,
-              mileage = ${Option.empty[Int]}, firstRegistration = ${Option.empty[Date]},
-              new = ${true}
-              where id = $id"""
-      case UsedCar(id, title, fuel, price, mileage, firstRegistration) =>
-        SQL"""update cars set title = $title, fuel = ${fuel.toString}, price = $price,
-              mileage = ${mileage}, firstRegistration = ${toDate(firstRegistration)},
-              new = ${false}
-              where id = $id"""
-    }
-    query.executeUpdate()
+  override def find(id: Long): Option[CarAdvert] = DB.withConnection { implicit c =>
+    SQL"select id, title, fuel, price, new, mileage, firstRegistration from cars where id = $id"
+      .as(carParser.singleOpt)
   }
 
-  override def exists(id: Long): Boolean = DB.withConnection { implicit c =>
-    SQL"select id from cars where id = $id".as(int("id").singleOpt).nonEmpty
+  override def replace(car: CarAdvert): Int = DB.withConnection { implicit c =>
+    SQL"""update cars set title = ${car.title}, fuel = ${car.fuel.toString}, price = ${car.price},
+          new = ${car.`new`}, mileage = ${car.mileage},
+          firstRegistration = ${car.firstRegistration map toDate _}
+          where id = ${car.id}""".executeUpdate()
   }
 
-  override def remove(id: Long): Int = DB.withConnection { implicit c =>
-    SQL"delete from cars where id = $id".executeUpdate()
+  override def exists(id: Long): Boolean = DB.withConnection {
+    implicit c =>
+      SQL"select id from cars where id = $id".as(int("id").singleOpt).nonEmpty
   }
 
-  override def findAll: Seq[Car] = DB.withConnection { implicit c =>
-    val parser = usedCarParser ~ bool("new") map {
-      case id ~ title ~ fuel ~ price ~ Some(mileage) ~ Some(date) ~ true =>
-        UsedCar(id, title, fuel, price, mileage, toLocalDate(date))
-      case id ~ title ~ fuel ~ price ~ None ~ None ~ false =>
-        BrandNewCar(id, title, fuel, price)
-      case broken =>
-        throw new RuntimeException(s"stored advert is inconsistent: $broken")
-    }
-    SQL"select new, id, title, fuel, price, mileage, firstRegistration from cars"
-      .as(parser.*)
+  override def remove(id: Long): Int = DB.withConnection {
+    implicit c =>
+      SQL"delete from cars where id = $id".executeUpdate()
+  }
 
+  override def findAll: Seq[CarAdvert] = DB.withConnection { implicit c =>
+      SQL"select new, id, title, fuel, price, new, mileage, firstRegistration from cars"
+        .as(carParser.*)
   }
 }

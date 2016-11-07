@@ -1,17 +1,15 @@
 package models
 
-import controllers.AdvertForm
-
 trait CarRepository {
   def addNew(form: AdvertForm): Option[Long]
 
   def addUsed(form: AdvertForm): Option[Long]
 
-  def find(id: Long): Option[Car]
+  def find(id: Long): Option[CarAdvert]
 
-  def findAll: Seq[Car]
+  def findAll: Seq[CarAdvert]
 
-  def replace(car: Car): Int
+  def replace(car: CarAdvert): Int
 
   def exists(id: Long): Boolean
 

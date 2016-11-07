@@ -1,7 +1,7 @@
 package controllers
 
 import com.google.inject.Inject
-import models.{Car, CarRepository}
+import models.{AdvertForm, CarAdvert, CarRepository}
 
 class CarService @Inject()(repo: CarRepository) {
 
@@ -18,7 +18,7 @@ class CarService @Inject()(repo: CarRepository) {
 
   def findAll = repo.findAll
 
-  def replace(id: Long, car: Car): Unit = {
+  def replace(id: Long, car: CarAdvert): Unit = {
     require(id == car.id, "id cannot be changed, remove and create new advert")
     if (!repo.exists(id)) {
       throw new NoSuchElementException

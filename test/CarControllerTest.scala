@@ -1,11 +1,10 @@
 import controllers.{CarController, CarService}
+import models.{CarAdvert, Fuel}
 import org.scalatestplus.play._
-import play.api.mvc._
-import play.api.test._
-import models.{BrandNewCar, Fuel}
-import play.api.Logger
 import play.api.libs.json.Json
+import play.api.mvc._
 import play.api.test.Helpers._
+import play.api.test._
 
 class CarControllerTest extends PlaySpec with Results {
   "A CarController" when {
@@ -43,7 +42,7 @@ class CarControllerTest extends PlaySpec with Results {
 
     "GETting a /car/{id}" must {
       "respond with the car advert" in {
-        val car: BrandNewCar = BrandNewCar(1, "car", Fuel.Gasoline, 123)
+        val car = CarAdvert(1, "car", Fuel.Gasoline, 123, true, None, None)
         val repo = new MockCarRepository(Seq(car))
         val controller = new CarController(new CarService(repo))
         val result = contentAsJson(controller.get(1).apply(FakeRequest()))
@@ -87,7 +86,7 @@ class CarControllerTest extends PlaySpec with Results {
       }
 
       "remove an existing advert" in {
-        val car: BrandNewCar = BrandNewCar(1, "car", Fuel.Gasoline, 123)
+        val car = CarAdvert(1, "car", Fuel.Gasoline, 123, true, None, None)
         val repo = new MockCarRepository(Seq(car))
         val controller = new CarController(new CarService(repo))
         val result: Result = await(controller.remove(1).apply(FakeRequest()))

@@ -1,8 +1,7 @@
 import com.google.inject.Inject
-import controllers.AdvertForm
-import models.{Car, CarRepository}
+import models.{AdvertForm, CarAdvert, CarRepository}
 
-class MockCarRepository @Inject() (var cars: Seq[Car] = Seq()) extends CarRepository {
+class MockCarRepository @Inject() (var cars: Seq[CarAdvert] = Seq()) extends CarRepository {
   private var maxId: Int = 0
   override def addNew(form: AdvertForm): Option[Long] = {
     maxId += 1
@@ -11,7 +10,7 @@ class MockCarRepository @Inject() (var cars: Seq[Car] = Seq()) extends CarReposi
 
   override def addUsed(form: AdvertForm): Option[Long] = addNew(form)
 
-  override def find(id: Long): Option[Car] = {
+  override def find(id: Long): Option[CarAdvert] = {
     cars.find(id == _.id)
   }
 
@@ -23,7 +22,7 @@ class MockCarRepository @Inject() (var cars: Seq[Car] = Seq()) extends CarReposi
     removed.size
   }
 
-  override def replace(car: Car): Int = 1
+  override def replace(car: CarAdvert): Int = 1
 
-  override def findAll: Seq[Car] = ???
+  override def findAll: Seq[CarAdvert] = ???
 }

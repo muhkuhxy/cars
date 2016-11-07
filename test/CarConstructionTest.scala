@@ -1,72 +1,37 @@
-import org.scalatestplus.play._
-import models._
 import java.time._
 
-import controllers.AdvertForm
+import models._
+import org.scalatestplus.play._
 
 class CarConstructionTest extends PlaySpec {
   val are = afterWord("are")
 
-  "A brand new car" when {
+  "A car car advert" when {
 
     "created" must {
-      val validInput = (1, "super nice car", Fuel.Gasoline, 5000)
-      val buildCar = BrandNewCar.tupled
+      val validNewCarInput = (1, "super nice car", Fuel.Gasoline, 5000, true, None, None)
+      val validUsedCarInput = (2, "super used car", Fuel.Diesel, 2500, false, Some(120000), Some(LocalDate.now))
+      val buildCar = (CarAdvert.apply _).tupled
 
       "succeed on valid values" in {
-        val car = buildCar(validInput)
-        car mustBe a[BrandNewCar]
-        car.id mustBe validInput._1
-        car.title mustBe validInput._2
-        car.fuel mustBe validInput._3
-        car.price mustBe validInput._4
+        val newCar = buildCar(validNewCarInput)
+        val Some(values) = CarAdvert.unapply(newCar)
+        values mustBe validNewCarInput
+
+        val usedCar = buildCar(validUsedCarInput)
+        val Some(usedValues) = CarAdvert.unapply(usedCar)
+        usedValues mustBe validUsedCarInput
       }
 
       "fail on invalid values" which are {
         Seq(
-          ("title is null", validInput.copy(_2 = null)),
-          ("title is empty", validInput.copy(_2 = "")),
-          ("fuel is null", validInput.copy(_3 = null)),
-          ("price is negative", validInput.copy(_4 = -1))
-        ).foreach { case (condition, args) =>
-          condition in {
-            a[IllegalArgumentException] must be thrownBy {
-              buildCar(args)
-            }
-          }
-        }
-      }
-    }
-
-  }
-
-  "A used car" when {
-
-    "created" must {
-      val registration = LocalDate.of(2011, Month.DECEMBER, 13)
-      val validInput = (1, "super nice car", Fuel.Gasoline, 5000, 12026, registration)
-      val buildCar = UsedCar.tupled
-
-      "succeed on valid values" in {
-        val car = buildCar(validInput)
-        car mustBe a[UsedCar]
-        val usedCar = car.asInstanceOf[UsedCar]
-        usedCar.id mustBe validInput._1
-        usedCar.title mustBe validInput._2
-        usedCar.fuel mustBe validInput._3
-        usedCar.price mustBe validInput._4
-        usedCar.mileage mustBe validInput._5
-        usedCar.firstRegistration mustBe validInput._6
-      }
-
-      "fail on invalid values" which are {
-        Seq(
-          ("title is null", validInput.copy(_2 = null)),
-          ("title is empty", validInput.copy(_2 = "")),
-          ("fuel is null", validInput.copy(_3 = null)),
-          ("price is negative", validInput.copy(_4 = -1)),
-          ("mileage is negative", validInput.copy(_5 = -1)),
-          ("registration is null", validInput.copy(_6 = null))
+          ("title is null", validNewCarInput.copy(_2 = null)),
+          ("title is empty", validNewCarInput.copy(_2 = "")),
+          ("fuel is null", validNewCarInput.copy(_3 = null)),
+          ("price is negative", validNewCarInput.copy(_4 = -1)),
+          ("used and mileage missing", validUsedCarInput.copy(_6 = None)),
+          ("used and firstRegistration missing", validUsedCarInput.copy(_7 = None)),
+          ("negative mileage", validUsedCarInput.copy(_6 = Some(-1)))
         ).foreach { case (condition, args) =>
           condition in {
             a[IllegalArgumentException] must be thrownBy {

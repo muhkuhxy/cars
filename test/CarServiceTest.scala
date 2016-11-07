@@ -1,7 +1,7 @@
 import java.time.{LocalDate, Month}
 
-import controllers.{AdvertForm, CarService}
-import models.{BrandNewCar, Fuel}
+import controllers.CarService
+import models.{AdvertForm, CarAdvert, Fuel}
 import org.scalatestplus.play.PlaySpec
 
 class CarServiceTest extends PlaySpec {
@@ -27,7 +27,7 @@ class CarServiceTest extends PlaySpec {
 
     "refuse replacing adverts with different ids" in {
       a[IllegalArgumentException] must be thrownBy {
-        service.replace(1, BrandNewCar(2, "title", Fuel.Gasoline, 123))
+        service.replace(1, CarAdvert(2, "title", Fuel.Gasoline, 123, true, None, None))
       }
     }
   }

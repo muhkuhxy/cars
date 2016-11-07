@@ -2,8 +2,11 @@ package controllers
 
 import java.time.LocalDate
 
-import models.{BrandNewCar, Car, Fuel, UsedCar}
+import models._
+import play.api.Logger
+import play.api.data.validation.ValidationError
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 trait JsonConversions {
 
@@ -21,64 +24,60 @@ trait JsonConversions {
     }
   }
 
-  implicit val carFormReads = Json.reads[AdvertForm]
-
   implicit val fuelWrite = new Writes[Fuel.Type] {
     override def writes(fuel: Fuel.Type): JsValue = JsString(fuel.toString)
   }
 
-  val newCarFormat = Json.format[BrandNewCar]
+  implicit val advertFormReads = new Reads[AdvertForm] {
+    import Reads._
 
-  val usedCarFormat = Json.format[UsedCar]
+    def newnessReads: Reads[Option[(Int, LocalDate)]] = new Reads[Option[(Int, LocalDate)]] {
+      override def reads(json: JsValue): JsResult[Option[(Int, LocalDate)]] = {
+        val reader = (__ \ "mileage").readNullable[Int] and
+          (__ \ "firstRegistration").readNullable[LocalDate] and
+          (__ \ "new").read[Boolean]
+        reader.apply(mapping _).reads(json).fold(
+          err => JsError(err),
+          s => s match {
+            case Left(error) => error
+            case Right(s: Some[_]) => JsSuccess(s)
+            case Right(None) => JsSuccess(None)
+          }
+        )
+      }
 
-  implicit val carFormat: Format[Car] = new Format[Car] {
-    override def reads(json: JsValue): JsResult[Car] = {
-      json.transform((__ \ 'new).json.pick[JsBoolean]) match {
-        case JsSuccess(JsBoolean(true), _) => newCarFormat.reads(json)
-        case JsSuccess(JsBoolean(false), _) => usedCarFormat.reads(json)
-        case _ => JsError("missing \"new\" information")
+      def mapping(m: Option[Int], f: Option[LocalDate], n: Boolean): Either[JsError,Option[(Int, LocalDate)]] = (m, f, n) match {
+        case (Some(mileage), Some(firstRegistration), false) if mileage >= 0 =>
+          Right(Some(mileage, firstRegistration))
+        case (Some(_), Some(_), false) =>
+          Left(JsError(__ \ "mileage", "mileage must be >= 0"))
+        case (None, None, true) => Right(None)
+        case _ => Left(JsError(JsPath(), "invalid new/milage/firstRegistration combination"))
       }
     }
 
-    override def writes(car: Car): JsValue = {
-      val common = Json.obj(
-        "id" -> car.id,
-        "title" -> car.title,
-        "fuel" -> car.fuel,
-        "price" -> car.price
-      )
-      car match {
-        case bnc: BrandNewCar => common + ("new" -> JsBoolean(true))
-        case uc: UsedCar =>
-          common ++ Json.obj("new" -> false,
-            "mileage" -> uc.mileage,
-            "firstRegistration" -> uc.firstRegistration
-          )
-      }
+    override def reads(json: JsValue): JsResult[AdvertForm] = (
+      (__ \ "title").read[String](minLength[String](1)) and
+        (__ \ "fuel").read[Fuel.Type] and
+        (__ \ "price").read[Int](min(0)) and
+      __.read[Option[(Int, LocalDate)]](newnessReads)
+      )((title: String, fuel: Fuel.Type, price: Int, newness: Option[(Int, LocalDate)]) => {
+        newness match {
+          case Some((mileage, firstRegistration)) => AdvertForm(title, fuel, price, false, Some(mileage), Some(firstRegistration))
+          case None => AdvertForm(title, fuel, price, true, None, None)
+        }
+    }).reads(json)
+  }
+
+  implicit val advertWrites = Json.writes[CarAdvert]
+
+  implicit val advertReads: Reads[CarAdvert] = (
+    (__ \ "id").read[Int] and __.read[AdvertForm]
+    )((id: Int, form: AdvertForm) => {
+    form match {
+      case AdvertForm(title, fuel, price, newness, mileage, firstRegistration) =>
+        CarAdvert(id, title, fuel, price, newness, mileage, firstRegistration)
     }
-  }
+  })
 
-}
-
-case class AdvertForm(title: String,
-                      fuel: Fuel.Type,
-                      price: Int,
-                      `new`: Boolean,
-                      mileage: Option[Int],
-                      firstRegistration: Option[LocalDate]) {
-  require(title != null && !title.isEmpty)
-  require(fuel != null)
-  require(price >= 0)
-
-  require(mileage != null)
-  require(firstRegistration != null)
-  if(`new`) {
-    require(firstRegistration.isEmpty, "new cars must not have firstRegistration set")
-    require(mileage.isEmpty, "new cars must not have mileage set")
-  }
-  else {
-    require(firstRegistration.nonEmpty, "used cars must have firstRegistration set")
-    require(mileage.nonEmpty, "used cars must have mileage set")
-    require(mileage.get >= 0, "mileage must be >= 0")
-  }
 }
