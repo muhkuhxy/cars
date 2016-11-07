@@ -4,19 +4,19 @@ import java.util.Date
 
 import anorm.SqlParser._
 import anorm.{~, _}
-import controllers.CarForm
+import controllers.AdvertForm
 import play.api.Logger
 import play.api.db.DB
 import play.api.Play.current
 
 class AnormCarRepository extends CarRepository with DateConversions {
 
-  override def addNew(form: CarForm): Option[Long] = DB.withConnection { implicit c =>
+  override def addNew(form: AdvertForm): Option[Long] = DB.withConnection { implicit c =>
     SQL"insert into cars (title, fuel, price, new) values (${form.title}, ${form.fuel.toString}, ${form.price}, ${form.`new`});"
       .executeInsert()
   }
 
-  override def addUsed(form: CarForm): Option[Long] = DB.withConnection { implicit c =>
+  override def addUsed(form: AdvertForm): Option[Long] = DB.withConnection { implicit c =>
     SQL"""insert into cars (title, fuel, price, new, mileage, firstRegistration)
          values (${form.title}, ${form.fuel.toString}, ${form.price}, ${form.`new`},
         ${form.mileage}, ${form.firstRegistration map toDate _});

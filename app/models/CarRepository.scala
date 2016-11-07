@@ -1,11 +1,11 @@
 package models
 
-import controllers.CarForm
+import controllers.AdvertForm
 
 trait CarRepository {
-  def addNew(form: CarForm): Option[Long]
+  def addNew(form: AdvertForm): Option[Long]
 
-  def addUsed(form: CarForm): Option[Long]
+  def addUsed(form: AdvertForm): Option[Long]
 
   def find(id: Long): Option[Car]
 

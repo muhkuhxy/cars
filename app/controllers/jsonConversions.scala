@@ -21,7 +21,7 @@ trait JsonConversions {
     }
   }
 
-  implicit val carFormReads = Json.reads[CarForm]
+  implicit val carFormReads = Json.reads[AdvertForm]
 
   implicit val fuelWrite = new Writes[Fuel.Type] {
     override def writes(fuel: Fuel.Type): JsValue = JsString(fuel.toString)
@@ -60,12 +60,12 @@ trait JsonConversions {
 
 }
 
-case class CarForm(title: String,
-                   fuel: Fuel.Type,
-                   price: Int,
-                   `new`: Boolean,
-                   mileage: Option[Int],
-                   firstRegistration: Option[LocalDate]) {
+case class AdvertForm(title: String,
+                      fuel: Fuel.Type,
+                      price: Int,
+                      `new`: Boolean,
+                      mileage: Option[Int],
+                      firstRegistration: Option[LocalDate]) {
   require(title != null && !title.isEmpty)
   require(fuel != null)
   require(price >= 0)

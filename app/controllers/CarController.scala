@@ -12,13 +12,13 @@ import scala.util.{Failure, Success, Try}
 
 class CarController @Inject()(private val service: CarService) extends Controller with JsonConversions {
 
-  def list() = Action { request =>
+  def list = Action { request =>
     val cars: Seq[Car] = service.findAll
     Ok(Json.toJson(cars))
   }
 
   def create = Action(BodyParsers.parse.json) { request =>
-    request.body.validate[CarForm].fold(
+    request.body.validate[AdvertForm].fold(
       errors => {
         BadRequest(message(errors))
       },

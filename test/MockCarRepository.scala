@@ -1,15 +1,15 @@
 import com.google.inject.Inject
-import controllers.CarForm
+import controllers.AdvertForm
 import models.{Car, CarRepository}
 
 class MockCarRepository @Inject() (var cars: Seq[Car] = Seq()) extends CarRepository {
   private var maxId: Int = 0
-  override def addNew(form: CarForm): Option[Long] = {
+  override def addNew(form: AdvertForm): Option[Long] = {
     maxId += 1
     Some(maxId)
   }
 
-  override def addUsed(form: CarForm): Option[Long] = addNew(form)
+  override def addUsed(form: AdvertForm): Option[Long] = addNew(form)
 
   override def find(id: Long): Option[Car] = {
     cars.find(id == _.id)

@@ -5,7 +5,7 @@ import models.{Car, CarRepository}
 
 class CarService @Inject()(repo: CarRepository) {
 
-  def add(form: CarForm): Option[Long] = {
+  def add(form: AdvertForm): Option[Long] = {
     if (form.`new`) {
       repo.addNew(form)
     }
