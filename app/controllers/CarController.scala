@@ -18,7 +18,7 @@ class CarController @Inject()(private val service: CarService) extends Controlle
 
   def list(sort: String, ascending: Boolean) = Action { request =>
     if (!sortable.contains(sort)) {
-      BadRequest(s"cannot sort by $sort")
+      BadRequest(message(s"cannot sort by $sort"))
     }
     else {
       val cars: Seq[CarAdvert] = service.findAll(sort, ascending)

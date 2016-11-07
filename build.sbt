@@ -9,6 +9,6 @@ libraryDependencies ++= Seq(
   "org.scalatestplus" %% "play" % "1.4.0" % "test",
   jdbc,
   "com.typesafe.play" %% "anorm" % "2.4.0",
-  evolutions
-
+  evolutions,
+  filters
 )
