@@ -75,5 +75,5 @@ Removing an existing advert:
 
 ## Installation
 
-Perform `sbt run`, point your browser to [http://localhost:9000/car]() and apply evolutions.
+Perform `sbt run`, point your browser to [http://localhost:9000/car](http://localhost:9000/car) and apply evolutions.
 The service creates a local H2 database in the repository and comes with a small test dataset.
