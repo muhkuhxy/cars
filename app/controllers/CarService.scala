@@ -16,6 +16,8 @@ class CarService @Inject()(repo: CarRepository) {
 
   def find(id: Long) = repo.find(id)
 
+  def findAll = repo.findAll
+
   def replace(id: Long, car: Car): Unit = {
     require(id == car.id, "id cannot be changed, remove and create new advert")
     if (!repo.exists(id)) {

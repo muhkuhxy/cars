@@ -3,7 +3,7 @@ package models
 import java.util.Date
 
 import anorm.SqlParser._
-import anorm._
+import anorm.{~, _}
 import controllers.CarForm
 import play.api.Logger
 import play.api.db.DB
@@ -23,23 +23,24 @@ class AnormCarRepository extends CarRepository with DateConversions {
        """.executeInsert()
   }
 
-  private val baseCarParser = int("id") ~ str("title") ~ (str("fuel") map Fuel.apply _) ~ int("price")
+  private val newCarParser = int("id") ~ str("title") ~ (str("fuel") map Fuel.apply _) ~ int("price")
+  private val usedCarParser = newCarParser ~ get[Option[Int]]("mileage") ~ (get[Option[Date]]("firstRegistration"))
 
   override def find(id: Long): Option[Car] = DB.withConnection { implicit c =>
     SQL"select new from cars where id = $id".as(bool("new").singleOpt) map { isNew: Boolean =>
       if(isNew) {
         val tuple = SQL"select id, title, fuel, price from cars where id = $id"
-          .as(baseCarParser.map(flatten).single)
+          .as(newCarParser.map(flatten).single)
         BrandNewCar.tupled(tuple)
       }
       else {
-        val tuple = SQL"select id, title, fuel, price, mileage, firstRegistration from cars where id = $id"
-          .as((baseCarParser ~ get[Option[Int]]("mileage") ~ (get[Option[Date]]("firstRegistration"))).map(flatten).single)
-        tuple match {
+        val parser = usedCarParser map flatten map {
           case (id, title, fuel, price, Some(mileage), Some(firstRegistration)) =>
             UsedCar(id, title, fuel, price, mileage, toLocalDate(firstRegistration))
-          case _ => throw new RuntimeException(s"stored advert with id $id is inconsistent $tuple")
+          case broken => throw new RuntimeException(s"stored advert with id $id is inconsistent $broken")
         }
+        SQL"select id, title, fuel, price, mileage, firstRegistration from cars where id = $id"
+          .as(parser.single)
       }
     }
   }
@@ -66,5 +67,19 @@ class AnormCarRepository extends CarRepository with DateConversions {
 
   override def remove(id: Long): Int = DB.withConnection { implicit c =>
     SQL"delete from cars where id = $id".executeUpdate()
+  }
+
+  override def findAll: Seq[Car] = DB.withConnection { implicit c =>
+    val parser = usedCarParser ~ bool("new") map {
+      case id ~ title ~ fuel ~ price ~ Some(mileage) ~ Some(date) ~ true =>
+        UsedCar(id, title, fuel, price, mileage, toLocalDate(date))
+      case id ~ title ~ fuel ~ price ~ None ~ None ~ false =>
+        BrandNewCar(id, title, fuel, price)
+      case broken =>
+        throw new RuntimeException(s"stored advert is inconsistent: $broken")
+    }
+    SQL"select new, id, title, fuel, price, mileage, firstRegistration from cars"
+      .as(parser.*)
+
   }
 }

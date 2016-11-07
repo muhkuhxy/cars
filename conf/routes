@@ -1,3 +1,4 @@
+GET    /car               @controllers.CarController.list
 POST   /car               @controllers.CarController.create
 PUT    /car/:id           @controllers.CarController.update(id: Long)
 GET    /car/:id           @controllers.CarController.get(id: Long)

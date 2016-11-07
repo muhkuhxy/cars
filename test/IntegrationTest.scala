@@ -10,7 +10,7 @@ class IntegrationTest extends PlaySpec with OneServerPerSuite {
 
   override lazy val app = new GuiceApplicationBuilder()
     .overrides(bind[CarRepository].to[AnormCarRepository])
-    .configure(inMemoryDatabase("default", Map("MODE" -> "MYSQL")))
+    .configure(inMemoryDatabase("default"))
     .build()
 
   "The car advert api" must {
