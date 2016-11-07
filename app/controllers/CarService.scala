@@ -3,26 +3,31 @@ package controllers
 import com.google.inject.Inject
 import models.{Car, CarRepository}
 
-class CarService @Inject() (repo: CarRepository) {
+class CarService @Inject()(repo: CarRepository) {
 
   def add(form: CarForm): Option[Long] = {
-    if(form.`new`) {
-      require(form.firstRegistration.isEmpty)
-      require(form.mileage.isEmpty)
+    if (form.`new`) {
       repo.addNew(form)
     }
     else {
-      require(form.firstRegistration.nonEmpty)
-      require(form.mileage.nonEmpty)
       repo.addUsed(form)
     }
   }
 
   def find(id: Long) = repo.find(id)
 
-  def replace(id: Long, car: Car): Boolean = {
-    require(id == car.id)
-    repo.replace(car)
+  def replace(id: Long, car: Car): Unit = {
+    require(id == car.id, "id cannot be changed, remove and create new advert")
+    if (!repo.exists(id)) {
+      throw new NoSuchElementException
+    }
+    else {
+      val rowsAffected = repo.replace(car)
+      if(rowsAffected != 1) {
+        throw new IllegalStateException(
+          s"expected to update 1 row, but actually updated $rowsAffected on car $car")
+      }
+    }
   }
 
 }

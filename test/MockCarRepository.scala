@@ -2,7 +2,7 @@ import com.google.inject.Inject
 import controllers.CarForm
 import models.{Car, CarRepository}
 
-class MockCarRepository @Inject() (val cars: Seq[Car] = Seq()) extends CarRepository {
+class MockCarRepository @Inject() (var cars: Seq[Car] = Seq()) extends CarRepository {
   private var maxId: Int = 0
   override def addNew(form: CarForm): Option[Long] = {
     maxId += 1
@@ -15,5 +15,7 @@ class MockCarRepository @Inject() (val cars: Seq[Car] = Seq()) extends CarReposi
     cars.find(id == _.id)
   }
 
-  override def replace(car: Car): Boolean = true
+  override def exists(id: Long): Boolean = cars.find(id == _.id).nonEmpty
+
+  override def replace(car: Car): Int = 1
 }

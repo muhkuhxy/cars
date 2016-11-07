@@ -44,7 +44,7 @@ class AnormCarRepository extends CarRepository with DateConversions {
     }
   }
 
-  override def replace(car: Car): Boolean = DB.withConnection { implicit c =>
+  override def replace(car: Car): Int = DB.withConnection { implicit c =>
     val query = car match {
       case BrandNewCar(id, title, fuel, price) =>
         SQL"""update cars set title = $title, fuel = ${fuel.toString}, price = $price,
@@ -57,10 +57,11 @@ class AnormCarRepository extends CarRepository with DateConversions {
               new = ${false}
               where id = $id"""
     }
-    val rowsAffected = query.executeUpdate()
-    if(rowsAffected != 1) {
-      Logger.error(s"expected to update 1 row, but actually updated $rowsAffected on car $car")
-    }
-    rowsAffected == 1
+    query.executeUpdate()
   }
+
+  override def exists(id: Long): Boolean = DB.withConnection { implicit c =>
+    SQL"select id from cars where id = $id".as(int("id").singleOpt).nonEmpty
+  }
+
 }

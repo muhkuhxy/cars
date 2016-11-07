@@ -62,7 +62,7 @@ class CarControllerTest extends PlaySpec with Results {
 
     "PUTting an existing advert" must {
       "refuse inconsistent requests" in {
-        val result: Result = await(controller.create().apply(FakeRequest().withBody(
+        val result: Result = await(controller.update(1).apply(FakeRequest().withBody(
           Json.parse(
             """{
               |"id": 1,

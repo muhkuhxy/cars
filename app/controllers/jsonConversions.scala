@@ -48,7 +48,7 @@ trait JsonConversions {
         "price" -> car.price
       )
       car match {
-        case bnc: BrandNewCar => common ++ Json.obj("new" -> true)
+        case bnc: BrandNewCar => common + ("new" -> JsBoolean(true))
         case uc: UsedCar =>
           common ++ Json.obj("new" -> false,
             "mileage" -> uc.mileage,
@@ -65,4 +65,18 @@ case class CarForm(title: String,
                    price: Int,
                    `new`: Boolean,
                    mileage: Option[Int],
-                   firstRegistration: Option[LocalDate])
+                   firstRegistration: Option[LocalDate]) {
+  if(`new`) {
+    require(firstRegistration.isEmpty, "new cars must not have firstRegistration set")
+    require(mileage.isEmpty, "new cars must not have mileage set")
+  }
+  else {
+    require(firstRegistration.nonEmpty, "used cars must have firstRegistration set")
+    require(mileage.nonEmpty, "used cars must have mileage set")
+  }
+  require(title != null && !title.isEmpty)
+  require(fuel != null)
+  require(price >= 0)
+  require(mileage != null)
+  require(firstRegistration != null)
+}

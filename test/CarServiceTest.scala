@@ -26,7 +26,9 @@ class CarServiceTest extends PlaySpec {
     }
 
     "refuse replacing adverts with different ids" in {
-      service.replace(1, BrandNewCar(1, "title", Fuel.Gasoline, 123))
+      a[IllegalArgumentException] must be thrownBy {
+        service.replace(1, BrandNewCar(2, "title", Fuel.Gasoline, 123))
+      }
     }
   }
 

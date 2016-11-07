@@ -9,5 +9,8 @@ trait CarRepository {
 
   def find(id: Long): Option[Car]
 
-  def replace(car: Car): Boolean
+  def replace(car: Car): Int
+
+  def exists(id: Long): Boolean
+
 }
